@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Administración de Paquetes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Administración de Paquetes</h2>
+    <div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Volver al Panel
+        </a>
+    </div>
+</div>
+
+<!-- Barra de búsqueda y filtros mejorada -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form id="package-search-form" class="row g-3" method="GET" action="{{ url_for('admin_packages') }}">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" name="search" id="search-input" 
+                           placeholder="Buscar por N° de rastreo, cliente, teléfono, país..." 
+                           value="{{ search_query }}" aria-label="Buscar">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" name="date" id="date-filter" 
+                       value="{{ request.args.get('date', '') }}" placeholder="Filtrar por fecha">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" type="submit">
+                    <i class="fas fa-search me-1"></i> Buscar
+                </button>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('admin_packages') }}" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-times"></i> Limpiar Filtros
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'all' or not request.args.get('status') else '' }}" 
+                   href="{{ url_for('admin_packages', status='all', search=search_query, date=request.args.get('date', '')) }}">Todos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'registered' else '' }}" 
+                   href="{{ url_for('admin_packages', status='registered', search=search_query, date=request.args.get('date', '')) }}">Registrados</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'processing' else '' }}" 
+                   href="{{ url_for('admin_packages', status='processing', search=search_query, date=request.args.get('date', '')) }}">En Proceso</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'transit' else '' }}" 
+                   href="{{ url_for('admin_packages', status='transit', search=search_query, date=request.args.get('date', '')) }}">En Tránsito</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'customs' else '' }}" 
+                   href="{{ url_for('admin_packages', status='customs', search=search_query, date=request.args.get('date', '')) }}">En Aduanas</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'delivery' else '' }}" 
+                   href="{{ url_for('admin_packages', status='delivery', search=search_query, date=request.args.get('date', '')) }}">En Reparto</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ 'active' if request.args.get('status') == 'delivered' else '' }}" 
+                   href="{{ url_for('admin_packages', status='delivered', search=search_query, date=request.args.get('date', '')) }}">Entregados</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        {% if packages %}
+        <div class="table-responsive">
+            <table class="table table-striped" id="packages-table">
+                <thead>
+                    <tr>
+                        <th>N° de Rastreo</th>
+                        <th>Remitente</th>
+                        <th>Destinatario</th>
+                        <th>Destino</th>
+                        <th>Sucursal</th>
+                        <th>Estado</th>
+                        <th>Ubicación Actual</th>
+                        <th>Fecha de Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in packages %}
+                    <tr>
+                        <td>{{ package.tracking_number }}</td>
+                        <td>{{ package.sender_name }}</td>
+                        <td>{{ package.recipient_name }}</td>
+                        <td>{{ package.destination_country_name }}</td>
+                        <td>
+                            {% if package.branch == 'irvin' %}
+                                Irvin
+                            {% elif package.branch == 'carrolton' %}
+                                Carrolton
+                            {% elif package.branch == 'oklahoma' %}
+                                Oklahoma
+                            {% else %}
+                                No especificado
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if package.status.value == 'registered' %}
+                                <span class="badge bg-info">Registrado</span>
+                            {% elif package.status.value == 'processing' %}
+                                <span class="badge bg-primary">En Proceso</span>
+                            {% elif package.status.value == 'transit' %}
+                                <span class="badge bg-primary">En Tránsito</span>
+                            {% elif package.status.value == 'customs' %}
+                                <span class="badge bg-warning">En Aduanas</span>
+                            {% elif package.status.value == 'delivery' %}
+                                <span class="badge bg-info">En Reparto</span>
+                            {% elif package.status.value == 'delivered' %}
+                                <span class="badge bg-success">Entregado</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ package.status.value }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ package.current_location }}</td>
+                        <td>{{ package.registration_date.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_package_detail', tracking_number=package.tracking_number) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Gestionar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No hay paquetes que coincidan con los criterios seleccionados.
+            {% if search_query or request.args.get('date') %}
+            <a href="{{ url_for('admin_packages', status=request.args.get('status', 'all')) }}" class="alert-link ms-2">Limpiar búsqueda</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mantener los parámetros de búsqueda y estado al limpiar filtros
+    const clearFiltersBtn = document.querySelector('a[href*="admin_packages"]');
+    const searchForm = document.getElementById('package-search-form');
+
+    clearFiltersBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Restablece el formulario y mantiene el estado actual
+        searchForm.reset();
+        window.location.href = this.getAttribute('href');
+    });
+});
+</script>
+{% endblock %}

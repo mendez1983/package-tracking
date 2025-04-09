@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Confirmación{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0"><i class="fas fa-check-circle me-2"></i> Paquete Registrado Exitosamente</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-box-open fa-5x text-success mb-3"></i>
+                    <h4>¡Gracias por confiar en PackTrack!</h4>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 offset-md-3">
+                        <div class="alert alert-info">
+                            <h5 class="text-center">Número de Rastreo</h5>
+                            <div class="text-center p-3 bg-white rounded border mb-2" style="font-family: monospace; font-size: 1.5rem; font-weight: bold;">
+                                {{ package.tracking_number }}
+                            </div>
+                            <p class="text-center text-muted small">Guarde este número para rastrear su paquete.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="table table-striped mt-4">
+                    <tbody>
+                        <tr>
+                            <th width="40%">Remitente:</th>
+                            <td>{{ package.sender_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Destinatario:</th>
+                            <td>{{ package.recipient_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dirección de Entrega:</th>
+                            <td>{{ package.recipient_address }}</td>
+                        </tr>
+                        <tr>
+                            <th>País de Destino:</th>
+                            <td>{{ package.destination_country_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Peso Estimado:</th>
+                            <td>{{ package.estimated_weight }} libras</td>
+                        </tr>
+                        <tr>
+                            <th>Costo Estimado:</th>
+                            <td class="fw-bold text-primary">${{ package.estimated_cost }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="alert alert-warning mt-3">
+                    <p class="mb-0"><i class="fas fa-info-circle me-2"></i> El costo final se calculará cuando el paquete sea recibido en nuestra oficina.</p>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i> Volver al Inicio
+                    </a>
+                    <a href="{{ url_for('track_package', tracking_number=package.tracking_number) }}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i> Rastrear Este Paquete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

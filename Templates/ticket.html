@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Paquete - {{ package.tracking_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 12pt;
+        }
+        .ticket {
+            width: 90mm; /* Aumentado de 80mm a 90mm */
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+        }
+        .company-name {
+            font-size: 18pt;
+            font-weight: bold;
+        }
+        .info-row {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .label {
+            font-weight: bold;
+            flex: 1;
+        }
+        .value {
+            flex: 1;
+            text-align: right;
+            word-break: break-word; /* Permite que las palabras largas se rompan */
+        }
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+            font-size: 10pt;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .ticket {
+                width: 100%;
+                border: none;
+                max-width: 90mm; /* Controla el ancho máximo al imprimir */
+            }
+            /* Evita cortes de página dentro del ticket */
+            .ticket {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="header">
+            <div class="company-name">PackTrack</div>
+            <div>Sistema de Rastreo de Paquetes</div>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Nº de Rastreo:</span>
+            <span class="value">{{ package.tracking_number }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Fecha de Registro:</span>
+            <span class="value">{{ package.registration_date.strftime('%d/%m/%Y %H:%M') }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Tipo de Paquete:</span>
+            <span class="value">
+                {% if package.package_type.value == 'document' %}
+                    Documento
+                {% elif package.package_type.value == 'box-small' %}
+                    Caja Pequeña
+                {% elif package.package_type.value == 'box-medium' %}
+                    Caja Mediana
+                {% elif package.package_type.value == 'box-large' %}
+                    Caja Grande
+                {% elif package.package_type.value == 'fragile' %}
+                    Frágil
+                {% elif package.package_type.value == 'special' %}
+                    Especial
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Remitente:</span>
+            <span class="value">{{ package.sender_name }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Destinatario:</span>
+            <span class="value">{{ package.recipient_name }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Destino:</span>
+            <span class="value">{{ package.destination_country_name }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Peso:</span>
+            <span class="value">{{ package.actual_weight if package.actual_weight else package.estimated_weight }} libras</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="label">Costo:</span>
+            <span class="value">${{ package.final_cost if package.final_cost else package.estimated_cost }}</span>
+        </div>
+        
+        <div class="footer">
+            <p>¡Gracias por confiar en PackTrack!</p>
+            <p>Para rastrear su paquete, visite:<br>www.packtrack.com/track</p>
+            <p>Fecha de impresión: {{ now.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+    </div>
+    
+    <div class="no-print" style="text-align: center; margin-top: 20px;">
+        <button onclick="window.print()">Imprimir Ticket</button>
+        <button onclick="window.close()">Cerrar</button>
+    </div>
+</body>
+</html>

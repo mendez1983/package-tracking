@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Inicio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 text-center mb-5">
+        <h1 class="display-4">Bienvenido a PackTrack</h1>
+        <p class="lead">El sistema de rastreo de paquetes internacional más confiable</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-box-open fa-5x text-primary mb-3"></i>
+                <h3>Registrar Paquete</h3>
+                <p>Registre sus paquetes para envío internacional y obtenga un estimado del costo basado en el peso.</p>
+                <a href="{{ url_for('register_package') }}" class="btn btn-primary">Registrar Paquete</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-search-location fa-5x text-primary mb-3"></i>
+                <h3>Rastrear Paquete</h3>
+                <p>Siga el estado de su paquete en tiempo real durante todo el proceso de entrega.</p>
+                <a href="{{ url_for('track_package') }}" class="btn btn-primary">Rastrear Paquete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>Nuestro Proceso</h3>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-4">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-clipboard-list fa-2x"></i>
+                        </div>
+                        <h4>1. Registro</h4>
+                        <p>Registre su paquete con información del remitente y destinatario. Obtenga un estimado del costo basado en el peso.</p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-truck fa-2x"></i>
+                        </div>
+                        <h4>2. Procesamiento y Envío</h4>
+                        <p>Llevamos su paquete a través de todo el proceso logístico con actualizaciones en tiempo real a cada paso.</p>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                        <h4>3. Entrega y Notificación</h4>
+                        <p>Entregamos su paquete al destinatario y le notificamos al momento de la entrega.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

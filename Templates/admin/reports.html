@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Reportes{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        /* Reset completo para impresión */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            box-sizing: border-box;
+        }
+
+        /* Configuración de página */
+        @page {
+            size: letter portrait;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            font-size: 9pt;
+            line-height: 1.3;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+        }
+
+        /* Ocultar elementos no imprimibles */
+        .no-print, 
+        .navbar, 
+        .btn, 
+        form, 
+        .card-header,
+        footer,
+        .footer,
+        #footer,
+        .site-footer,
+        nav {
+            display: none !important;
+        }
+
+        /* Asegurar que el contenedor principal ocupe todo el espacio */
+        .container-fluid {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+
+        /* Contenido de impresión */
+        #print-content {
+            display: block !important;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: white;
+            position: relative;
+            min-height: 100%;
+        }
+
+        /* Estilos de tabla */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5mm;
+            page-break-inside: auto;
+        }
+
+        .table tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        .table th, 
+        .table td {
+            border: 0.5pt solid #000;
+            padding: 3pt;
+            font-size: 8pt;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .table th {
+            background-color: #f8f9fa !important;
+            font-weight: bold;
+            text-align: center;
+            font-size: 8pt;
+            text-transform: uppercase;
+        }
+
+        /* Encabezado del reporte */
+        .report-header {
+            text-align: center;
+            margin-bottom: 5mm;
+            border-bottom: 1pt solid #000;
+            padding-bottom: 3mm;
+        }
+
+        .report-header h1 {
+            font-size: 14pt;
+            margin: 0 0 2mm 0;
+            font-weight: bold;
+        }
+
+        .report-header h2 {
+            font-size: 12pt;
+            margin: 0 0 2mm 0;
+        }
+
+        .report-header p {
+            font-size: 10pt;
+            margin: 0;
+        }
+
+        /* Sección de resumen */
+        .summary-section {
+            margin-bottom: 5mm;
+            padding: 3mm;
+            border: 0.5pt solid #000;
+            background-color: #f8f9fa !important;
+        }
+
+        /* Alineación de texto */
+        .text-center { text-align: center !important; }
+        .text-end { text-align: right !important; }
+        .text-start { text-align: left !important; }
+
+        /* Márgenes y espaciado */
+        .mb-2 { margin-bottom: 2mm !important; }
+        .mb-3 { margin-bottom: 3mm !important; }
+        .mb-4 { margin-bottom: 4mm !important; }
+
+        /* Eliminar estilos de tarjeta */
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .card-body {
+            padding: 0 !important;
+        }
+
+        /* Asegurar que el contenido termine antes del final de la página */
+        .report-section:last-child {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    /* Estilos solo para pantalla */
+    @media screen {
+        #print-content {
+            padding: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Controles de pantalla -->
+    <div class="row mb-4 align-items-center no-print">
+        <div class="col-md-6">
+            <h2 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-chart-line me-2"></i>Generación de Reportes
+            </h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i>Volver al Panel
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4 no-print">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter me-2"></i>Filtros de Reporte
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('admin_reports') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label text-muted">Fecha Inicial</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label text-muted">Fecha Final</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="branch" class="form-label text-muted">Sucursal</label>
+                    <select class="form-select" id="branch" name="branch">
+                        <option value="all" {% if selected_branch == 'all' %}selected{% endif %}>Todas las sucursales</option>
+                        {% for branch in branches %}
+                        <option value="{{ branch }}" {% if selected_branch == branch %}selected{% endif %}>{{ branch|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Generar Reporte
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if report_data and (start_date or end_date) %}
+    <div class="card shadow-sm">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center no-print">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-file-alt me-2"></i>Resultados del Reporte
+            </h6>
+            <div>
+                <button onclick="window.print()" class="btn btn-outline-info">
+                    <i class="fas fa-print me-2"></i>Imprimir Reporte
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="print-content">
+                <!-- Encabezado del reporte -->
+                <div class="report-header">
+                    <h1>REPORTE DE PAQUETES</h1>
+                    {% if selected_branch != 'all' %}
+                    <h2>Sucursal: {{ selected_branch|title }}</h2>
+                    {% endif %}
+                    <p>Período: {{ start_date }} al {{ end_date }}</p>
+                </div>
+                
+                <!-- Resumen general -->
+                <div class="summary-section mb-4">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Total de Paquetes:</strong> {{ total_packages }}
+                        </div>
+                        <div class="col-6 text-end">
+                            <strong>Ingresos Totales:</strong> ${{ total_revenue|round(2) }}
+                        </div>
+                    </div>
+                </div>
+                
+                {% for item in report_data %}
+                <div class="report-section mb-4">
+                    <h3 class="h5 mb-3">Reporte del {{ item.date }}</h3>
+                    
+                    <!-- Tabla de resumen diario -->
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>CANTIDAD DE PAQUETES</th>
+                                    <th>INGRESOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center">{{ item.date }}</td>
+                                    <td class="text-center">{{ item.count }}</td>
+                                    <td class="text-end">${{ item.revenue|round(2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tabla de detalles -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>N° DE RASTREO</th>
+                                    <th>SUCURSAL</th>
+                                    <th>REMITENTE</th>
+                                    <th>DESTINATARIO</th>
+                                    <th>DESTINO</th>
+                                    <th>ESTADO</th>
+                                    <th>COSTO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for package in item.packages %}
+                                <tr>
+                                    <td>{{ package.tracking_number }}</td>
+                                    <td class="text-center">{{ package.branch|title }}</td>
+                                    <td>{{ package.sender_name }}</td>
+                                    <td>{{ package.recipient_name }}</td>
+                                    <td>{{ package.destination_country_name }}</td>
+                                    <td class="text-center">{{ package.status.value|title }}</td>
+                                    <td class="text-end">${{ (package.final_cost if package.final_cost else package.estimated_cost)|round(2) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% elif start_date or end_date %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        No se encontraron paquetes para el período seleccionado.
+    </div>
+    {% else %}
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">Seleccione un rango de fechas para generar el reporte</h4>
+            <p class="text-muted mb-0">Use los filtros superiores para especificar el período y la sucursal deseada.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        startDateInput.addEventListener('change', function() {
+            if (endDateInput.value && this.value > endDateInput.value) {
+                alert('La fecha inicial no puede ser posterior a la fecha final');
+                this.value = '';
+            }
+        });
+
+        endDateInput.addEventListener('change', function() {
+            if (startDateInput.value && this.value < startDateInput.value) {
+                alert('La fecha final no puede ser anterior a la fecha inicial');
+                this.value = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

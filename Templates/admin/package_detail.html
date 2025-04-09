@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Detalles del Paquete{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalles del Paquete</h2>
+    <div>
+        <a href="{{ url_for('admin_packages') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Volver a la Lista
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Información del Paquete</h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Número de Rastreo:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">{{ package.tracking_number }}</div>
+                
+                <p class="mb-2"><strong>Sucursal de Registro:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">
+                    {% if package.branch == 'irvin' %}
+                        Irvin
+                    {% elif package.branch == 'carrolton' %}
+                        Carrolton
+                    {% elif package.branch == 'oklahoma' %}
+                        Oklahoma
+                    {% else %}
+                        No especificado
+                    {% endif %}
+                </div>
+                
+                <p class="mb-2"><strong>Tipo de Paquete:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">
+                    {% if package.package_type.value == 'document' %}
+                        Documento
+                    {% elif package.package_type.value == 'box-small' %}
+                        Caja Pequeña
+                    {% elif package.package_type.value == 'box-medium' %}
+                        Caja Mediana
+                    {% elif package.package_type.value == 'box-large' %}
+                        Caja Grande
+                    {% elif package.package_type.value == 'fragile' %}
+                        Frágil
+                    {% elif package.package_type.value == 'special' %}
+                        Especial
+                    {% endif %}
+                </div>
+                
+                <p class="mb-2"><strong>Estado Actual:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">
+                    {% if package.status.value == 'registered' %}
+                        <span class="badge bg-info">Registrado</span>
+                    {% elif package.status.value == 'processing' %}
+                        <span class="badge bg-primary">En Proceso</span>
+                    {% elif package.status.value == 'transit' %}
+                        <span class="badge bg-primary">En Tránsito</span>
+                    {% elif package.status.value == 'customs' %}
+                        <span class="badge bg-warning">En Aduanas</span>
+                    {% elif package.status.value == 'delivery' %}
+                        <span class="badge bg-info">En Reparto</span>
+                    {% elif package.status.value == 'delivered' %}
+                        <span class="badge bg-success">Entregado</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ package.status.value }}</span>
+                    {% endif %}
+                </div>
+                
+                <p class="mb-2"><strong>Fecha de Registro:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">{{ package.registration_date.strftime('%d/%m/%Y %H:%M') }}</div>
+                
+                {% if package.delivery_date %}
+                <p class="mb-2"><strong>Fecha de Entrega:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">{{ package.delivery_date.strftime('%d/%m/%Y %H:%M') }}</div>
+                {% endif %}
+                
+                <p class="mb-2"><strong>Peso Estimado:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">{{ package.estimated_weight }} libras</div>
+                
+                {% if package.actual_weight %}
+                <p class="mb-2"><strong>Peso Real:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">{{ package.actual_weight }} libras</div>
+                {% endif %}
+                
+                <p class="mb-2"><strong>Costo Estimado:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">${{ package.estimated_cost }}</div>
+                
+                {% if package.final_cost %}
+                <p class="mb-2"><strong>Costo Final:</strong></p>
+                <div class="p-2 bg-light rounded mb-3">${{ package.final_cost }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        {% if package.status.value == 'delivered' %}
+        <!-- Mensaje de paquete entregado -->
+        <div class="alert alert-success mb-4">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Paquete Entregado</strong>
+            <p class="mb-0">Este paquete fue entregado el {{ package.delivery_date.strftime('%d/%m/%Y %H:%M') }}. No se pueden realizar más modificaciones.</p>
+        </div>
+        {% else %}
+        <!-- Formulario de actualización -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Actualizar Estado</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_package_detail', tracking_number=package.tracking_number) }}">
+                    <input type="hidden" name="action" value="update_status">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="status" class="form-label">Estado</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="registered" {% if package.status.value == 'registered' %}selected{% endif %}>Registrado</option>
+                                <option value="processing" {% if package.status.value == 'processing' %}selected{% endif %}>En Proceso</option>
+                                <option value="transit" {% if package.status.value == 'transit' %}selected{% endif %}>En Tránsito</option>
+                                <option value="customs" {% if package.status.value == 'customs' %}selected{% endif %}>En Aduanas</option>
+                                <option value="delivery" {% if package.status.value == 'delivery' %}selected{% endif %}>En Reparto</option>
+                                <option value="delivered" {% if package.status.value == 'delivered' %}selected{% endif %}>Entregado</option>
+                                <option value="returned" {% if package.status.value == 'returned' %}selected{% endif %}>Devuelto</option>
+                                <option value="lost" {% if package.status.value == 'lost' %}selected{% endif %}>Perdido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Ubicación Actual</label>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ package.current_location }}" required>
+                        </div>
+                    </div>
+                    
+                    {% if not package.actual_weight and package.status.value in ['registered', 'processing'] %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="actual_weight" class="form-label">Peso Real (libras)</label>
+                            <input type="number" class="form-control" id="actual_weight" name="actual_weight" min="0.1" step="0.1" value="{{ package.estimated_weight }}" oninput="calculateFinalCost()">
+                            <div class="form-text">Ingrese el peso real del paquete para calcular el costo final.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Costo Final</label>
+                            <div id="final_cost_display" class="p-2 bg-light rounded">Calculando...</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notas</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i> Actualizar Estado
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Botones de acción siempre visibles -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if package.status.value == 'delivered' and not package.notification_sent %}
+                    <a href="{{ url_for('admin_notify_delivery', tracking_number=package.tracking_number) }}" class="btn btn-success">
+                        <i class="fas fa-bell me-2"></i> Enviar Notificación de Entrega
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('print_ticket', tracking_number=package.tracking_number) }}" target="_blank" class="btn btn-info">
+                        <i class="fas fa-print me-2"></i> Imprimir Comprobante
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historial de eventos -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Historial de Eventos</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Ubicación</th>
+                                <th>Estado</th>
+                                <th>Descripción</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                            <tr>
+                                <td>{{ event.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ event.location }}</td>
+                                <td>
+                                    {% if event.status.value == 'registered' %}
+                                        <span class="badge bg-info">Registrado</span>
+                                    {% elif event.status.value == 'processing' %}
+                                        <span class="badge bg-primary">En Proceso</span>
+                                    {% elif event.status.value == 'transit' %}
+                                        <span class="badge bg-primary">En Tránsito</span>
+                                    {% elif event.status.value == 'customs' %}
+                                        <span class="badge bg-warning">En Aduanas</span>
+                                    {% elif event.status.value == 'delivery' %}
+                                        <span class="badge bg-info">En Reparto</span>
+                                    {% elif event.status.value == 'delivered' %}
+                                        <span class="badge bg-success">Entregado</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ event.status.value }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ event.description }}</td>
+                                <td>{{ event.notes or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not package.actual_weight and package.status.value in ['registered', 'processing'] %}
+<script>
+    function calculateFinalCost() {
+        const weight = parseFloat(document.getElementById('actual_weight').value) || 0;
+        const costPerPound = 17.00;
+        const finalCost = (weight * costPerPound).toFixed(2);
+        document.getElementById('final_cost_display').textContent = `$${finalCost}`;
+    }
+
+    // Calcular costo inicial
+    window.addEventListener('load', calculateFinalCost);
+</script>
+{% endif %}
+{% endblock %}

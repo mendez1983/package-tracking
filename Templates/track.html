@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Rastreo de Paquete{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2>Rastreo de Paquete</h2>
+        <p>Ingrese el número de rastreo de su paquete para conocer su estado actual.</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('track_package') }}" class="row g-3 align-items-center">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="tracking_number" name="tracking_number" placeholder="Ingrese el número de rastreo (ej. PKT123456789)" {% if request.args.get('tracking_number') %}value="{{ request.args.get('tracking_number') }}"{% endif %} required>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">Rastrear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if package %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0">Información del Paquete</h3>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th width="40%">Número de Rastreo:</th>
+                            <td class="fw-bold">{{ package.tracking_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Remitente:</th>
+                            <td>{{ package.sender_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Destinatario:</th>
+                            <td>{{ package.recipient_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Destino:</th>
+                            <td>{{ package.destination_country_name }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th width="40%">Fecha de Registro:</th>
+                            <td>{{ package.registration_date.strftime('%d/%m/%Y') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Estado Actual:</th>
+                            <td class="fw-bold">
+                                {% if package.status.value == 'registered' %}
+                                    <span class="badge bg-info">Registrado</span>
+                                {% elif package.status.value == 'processing' %}
+                                    <span class="badge bg-primary">En Proceso</span>
+                                {% elif package.status.value == 'transit' %}
+                                    <span class="badge bg-primary">En Tránsito</span>
+                                {% elif package.status.value == 'customs' %}
+                                    <span class="badge bg-warning">En Aduanas</span>
+                                {% elif package.status.value == 'delivery' %}
+                                    <span class="badge bg-info">En Reparto</span>
+                                {% elif package.status.value == 'delivered' %}
+                                    <span class="badge bg-success">Entregado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ package.status.value }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Ubicación Actual:</th>
+                            <td>{{ package.current_location }}</td>
+                        </tr>
+                        <tr>
+                            <th>Tipo de Paquete:</th>
+                            <td>
+                                {% if package.package_type.value == 'document' %}
+                                    Documento
+                                {% elif package.package_type.value == 'box-small' %}
+                                    Caja Pequeña
+                                {% elif package.package_type.value == 'box-medium' %}
+                                    Caja Mediana
+                                {% elif package.package_type.value == 'box-large' %}
+                                    Caja Grande
+                                {% elif package.package_type.value == 'fragile' %}
+                                    Frágil
+                                {% elif package.package_type.value == 'special' %}
+                                    Especial
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h4 class="mt-4 mb-3">Progreso del Envío</h4>
+        <div class="progress-tracker">
+            <div class="progress-step">
+                <div class="step-icon {% if package.status.value in ['registered', 'processing', 'transit', 'customs', 'delivery', 'delivered'] %}completed{% endif %}">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="step-name">Registrado</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon {% if package.status.value == 'processing' %}active{% elif package.status.value in ['transit', 'customs', 'delivery', 'delivered'] %}completed{% endif %}">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="step-name">En Proceso</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon {% if package.status.value == 'transit' %}active{% elif package.status.value in ['customs', 'delivery', 'delivered'] %}completed{% endif %}">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <div class="step-name">En Tránsito</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon {% if package.status.value == 'customs' %}active{% elif package.status.value in ['delivery', 'delivered'] %}completed{% endif %}">
+                    <i class="fas fa-passport"></i>
+                </div>
+                <div class="step-name">En Aduanas</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon {% if package.status.value == 'delivery' %}active{% elif package.status.value == 'delivered' %}completed{% endif %}">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="step-name">En Reparto</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-icon {% if package.status.value == 'delivered' %}completed{% endif %}">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="step-name">Entregado</div>
+            </div>
+        </div>
+
+        <h4 class="mt-5 mb-3">Historial de Movimientos</h4>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>{{ event.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ event.location }}</td>
+                        <td>
+                            {% if event.status.value == 'registered' %}
+                                <span class="badge bg-info">Registrado</span>
+                            {% elif event.status.value == 'processing' %}
+                                <span class="badge bg-primary">En Proceso</span>
+                            {% elif event.status.value == 'transit' %}
+                                <span class="badge bg-primary">En Tránsito</span>
+                            {% elif event.status.value == 'customs' %}
+                                <span class="badge bg-warning">En Aduanas</span>
+                            {% elif event.status.value == 'delivery' %}
+                                <span class="badge bg-info">En Reparto</span>
+                            {% elif event.status.value == 'delivered' %}
+                                <span class="badge bg-success">Entregado</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ event.status.value }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.description }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if package.status.value == 'delivered' %}
+        <div class="alert alert-success mt-4">
+            <h5><i class="fas fa-check-circle me-2"></i> Paquete Entregado</h5>
+            <p>Su paquete fue entregado el {{ package.delivery_date.strftime('%d/%m/%Y %H:%M') }} en {{ package.current_location }}.</p>
+        </div>
+        {% endif %}
+
+        {% if package.status.value != 'delivered' %}
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle me-2"></i> Su paquete está actualmente en <strong>{{ package.current_location }}</strong>. Seguiremos actualizando su estado a medida que avance en el proceso de entrega.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% elif 'tracking_number' in request.form or 'tracking_number' in request.args %}
+<div class="alert alert-warning">
+    <i class="fas fa-exclamation-triangle me-2"></i> Lo sentimos, no se encontró ningún paquete con el número de rastreo proporcionado. Por favor verifique e intente nuevamente.
+</div>
+{% endif %}
+{% endblock %}

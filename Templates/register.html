@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}PackTrack - Registro de Paquete{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2>Registro de Paquete</h2>
+        <p>Complete el formulario para registrar un nuevo paquete para envío internacional.</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Información del Envío
+    </div>
+    <div class="card-body">
+        <form id="registerForm" method="POST" action="{{ url_for('register_package') }}">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="mb-3">Información del Remitente</h4>
+                    <div class="mb-3">
+                        <label for="sender_name" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="sender_name" name="sender_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sender_email" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="sender_email" name="sender_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sender_phone" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="sender_phone" name="sender_phone" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="mb-3">Información del Destinatario</h4>
+                    <div class="mb-3">
+                        <label for="recipient_name" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="recipient_name" name="recipient_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient_address" class="form-label">Dirección Completa</label>
+                        <textarea class="form-control" id="recipient_address" name="recipient_address" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient_phone" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="recipient_phone" name="recipient_phone" required>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="branch" class="form-label">Sucursal</label>
+                        <select class="form-select" id="branch" name="branch" required>
+                            <option value="">Seleccionar Sucursal...</option>
+                            <option value="irvin">Irvin</option>
+                            <option value="carrolton">Carrolton</option>
+                            <option value="oklahoma">Oklahoma</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="package_type" class="form-label">Tipo de Paquete</label>
+                        <select class="form-select" id="package_type" name="package_type" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="document">Documento</option>
+                            <option value="box-small">Caja Pequeña</option>
+                            <option value="box-medium">Caja Mediana</option>
+                            <option value="box-large">Caja Grande</option>
+                            <option value="fragile">Frágil</option>
+                            <option value="special">Especial</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                     <label for="estimated_weight" class="form-label">Peso Estimado (libras)</label>
+                     <input type="number" class="form-control" id="estimated_weight" name="estimated_weight" 
+                            min="1" step="0.1" value="1" required oninput="calculateEstimatedCost()">
+                     <div class="form-text">El peso mínimo es 1 libra. Todos los paquetes se redondean a la libra superior.</div>   
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="destination_country" class="form-label">País de Destino</label>
+                        <select class="form-select" id="destination_country" name="destination_country" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="SLV">El Salvador</option>
+							<option value="GTM">Guatemala</option>
+							<option value="USA">Estados Unidos</option>
+                            <option value="MEX">México</option>
+                            <option value="CAN">Canadá</option>
+                            <option value="ESP">España</option>
+                            <option value="COL">Colombia</option>
+                            <option value="ARG">Argentina</option>
+                            <option value="CHL">Chile</option>
+                            <option value="PER">Perú</option>
+                            <option value="BRA">Brasil</option>
+                            <option value="OTH">Otro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6 offset-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h4>Costo Estimado</h4>
+                            <div id="cost_display" class="display-6 text-primary">$0.00</div>
+                            <p class="text-muted"><small>Basado en $17.00 por libra. El costo final se calculará al recibir el paquete en nuestra oficina.</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-paper-plane me-2"></i> Registrar Paquete
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-secondary btn-lg w-100" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt me-2"></i> Nuevo Registro
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function calculateEstimatedCost() {
+        const weight = parseFloat(document.getElementById('estimated_weight').value) || 0;
+        const costPerPound = 17.00;
+        const estimatedCost = (weight * costPerPound).toFixed(2);
+        document.getElementById('cost_display').textContent = `$${estimatedCost}`;
+    }
+
+    // Calcular costo inicial
+    window.addEventListener('load', calculateEstimatedCost);
+</script>
+{% endblock %}
