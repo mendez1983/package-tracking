@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta - {{ package.tracking_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 12pt;
+            background-color: #f4f4f4;
+        }
+        .label-container {
+            width: 100mm;
+            background-color: white;
+            margin: 10px auto;
+            border: 1px solid #000;
+            padding: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+        .company-logo {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .tracking-number {
+            font-family: monospace;
+            font-size: 14pt;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #000;
+            padding: 5px;
+            margin: 10px 0;
+            background-color: #f8f9fa;
+        }
+        .section {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 10pt;
+            margin-bottom: 3px;
+            background-color: #f0f0f0;
+            padding: 2px 5px;
+        }
+        .section-content {
+            padding: 2px 5px;
+            font-size: 11pt;
+        }
+        .branch-info {
+            text-align: center;
+            font-size: 10pt;
+            background-color: #e9ecef;
+            padding: 3px;
+            margin-top: 10px;
+            border-radius: 3px;
+        }
+        .date-info {
+            font-size: 9pt;
+            text-align: right;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .barcode {
+            text-align: center;
+            margin: 10px 0;
+            padding: 5px;
+        }
+        .barcode img {
+            max-width: 100%;
+        }
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px dashed #000;
+        }
+        .package-type {
+            font-size: 12pt;
+            text-align: center;
+            font-weight: bold;
+            margin: 5px 0;
+            padding: 3px;
+            background-color: #FFD700;
+            border-radius: 3px;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: white;
+            }
+            .label-container {
+                width: 100%;
+                border: none;
+                max-width: 100mm;
+                box-shadow: none;
+            }
+            .no-print {
+                display: none;
+            }
+            @page {
+                size: 100mm 150mm;
+                margin: 0;
+            }
+            .label-container {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="label-container">
+        <div class="header">
+            <div class="company-logo">PackTrack</div>
+            <div>Sistema de Rastreo de Paquetes</div>
+        </div>
+        
+        <div class="tracking-number">
+            {{ package.tracking_number }}
+        </div>
+        
+        <div class="package-type">
+            {% if package.package_type.value == 'document' %}
+                DOCUMENTO
+            {% elif package.package_type.value == 'box-small' %}
+                CAJA PEQUEÑA
+            {% elif package.package_type.value == 'box-medium' %}
+                CAJA MEDIANA
+            {% elif package.package_type.value == 'box-large' %}
+                CAJA GRANDE
+            {% elif package.package_type.value == 'fragile' %}
+                FRÁGIL - MANEJAR CON CUIDADO
+            {% elif package.package_type.value == 'special' %}
+                MANEJO ESPECIAL
+            {% endif %}
+        </div>
+        
+        <div class="section">
+            <div class="section-title">DESTINO:</div>
+            <div class="section-content">{{ package.destination_country_name }}</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">REMITENTE:</div>
+            <div class="section-content">{{ package.sender_name }}</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">DESTINATARIO:</div>
+            <div class="section-content">{{ package.recipient_name }}</div>
+            <div class="section-content" style="font-size: 10pt;">{{ package.recipient_address }}</div>
+            <div class="section-content" style="font-size: 10pt;">Tel: {{ package.recipient_phone }}</div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">INFORMACIÓN DEL PAQUETE:</div>
+            <div class="section-content" style="display: flex; justify-content: space-between;">
+                <span>Peso: {{ package.estimated_weight }} libras</span>
+            </div>
+        </div>
+        
+        <div class="branch-info">
+            Sucursal: 
+            {% if package.branch == 'irvin' %}
+                IRVIN
+            {% elif package.branch == 'carrolton' %}
+                CARROLTON
+            {% elif package.branch == 'oklahoma' %}
+                OKLAHOMA
+            {% else %}
+                {{ package.branch | upper }}
+            {% endif %}
+        </div>
+        
+        <div class="date-info">
+            Fecha de registro: {{ package.registration_date.strftime('%d/%m/%Y %H:%M') }}
+        </div>
+        
+        <div class="footer">
+            Para rastrear este paquete visite: www.packtrack.com/track
+            e ingrese el número de rastreo.
+        </div>
+    </div>
+    
+    <div class="no-print" style="text-align: center; margin: 20px auto;">
+        <button onclick="window.print()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-right: 10px;">
+            <i style="margin-right: 5px;">📄</i> Imprimir Etiqueta
+        </button>
+        <button onclick="window.close()" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+            <i style="margin-right: 5px;">✖</i> Cerrar
+        </button>
+    </div>
+</body>
+</html> 

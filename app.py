@@ -580,6 +580,15 @@ def print_ticket(tracking_number):
     package = Package.query.filter_by(tracking_number=tracking_number).first_or_404()
     return render_template('ticket.html', package=package, now=datetime.utcnow())
 
+@app.route('/label/<tracking_number>')
+def print_label(tracking_number):
+    package = Package.query.filter_by(tracking_number=tracking_number).first_or_404()
+    return render_template('label.html', package=package, now=datetime.utcnow())
+
+@app.route('/offline')
+def offline():
+    return render_template('offline.html')
+
 # Incluir todas las rutas de registro de paquetes, notificaciones, etc. de tu script original
 
 # Resto de las rutas de tu aplicación...

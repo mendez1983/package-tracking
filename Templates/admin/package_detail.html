@@ -177,6 +177,9 @@
                     <a href="{{ url_for('print_ticket', tracking_number=package.tracking_number) }}" target="_blank" class="btn btn-info">
                         <i class="fas fa-print me-2"></i> Imprimir Comprobante
                     </a>
+                    <a href="{{ url_for('print_label', tracking_number=package.tracking_number) }}" target="_blank" class="btn btn-warning">
+                        <i class="fas fa-tag me-2"></i> Imprimir Etiqueta
+                    </a>
                 </div>
             </div>
         </div>
